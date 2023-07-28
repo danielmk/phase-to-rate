@@ -5,6 +5,7 @@ Created on Mon Jan 24 20:31:08 2022
 @author: Daniel
 """
 
+
 import sqlite3
 import os
 import pandas as pd
@@ -28,7 +29,9 @@ db_path = os.path.join(
 con = sqlite3.connect(db_path)
 cur = con.cursor()
 
-rows = cur.execute(f"""SELECT * FROM tempotron_run WHERE n_cells=2000 AND (tempotron_seed=91 OR tempotron_seed=95)""")
+rows = cur.execute(
+    """SELECT * FROM tempotron_run WHERE n_cells=2000 AND (tempotron_seed=91 OR tempotron_seed=95)"""
+)
 data = []
 for x in rows:
     data.append(x)

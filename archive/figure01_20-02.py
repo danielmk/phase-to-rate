@@ -65,16 +65,17 @@ def _precession_spikes(overall, dur_s=5, n_sim=1000, T=0.1,
     phases_doubled = [[] for _ in range(n_time_bins)]
     trains = []
     np.random.seed(poisson_seed_start)
-    for i in range(n_sim):
+    for _ in range(n_sim):
         train = stg.inhomogeneous_poisson_process(asig,
                                                   refractory_period=(0.001 *
                                                                      pq.s),
                                                   as_array=True)*1000
-        if shuffle is True:
-            train = grid_model._randomize_grid_spikes(train, 100,
-                                                      time_ms=dur_ms)/1000
-        else:
-            train = train/1000
+        train = (
+            grid_model._randomize_grid_spikes(train, 100, time_ms=dur_ms)
+            / 1000
+            if shuffle is True
+            else train / 1000
+        )
         trains.append(train)
         for j, time in enumerate(times):
             if j == times.shape[0]-1:

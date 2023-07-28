@@ -29,7 +29,12 @@ n_granule = 20
 fig = plt.figure(constrained_layout=True, figsize=(8.25,11+17/24))
 gs = fig.add_gridspec(12,12)
 ax1 = fig.add_subplot(gs[0:4,0:6])
-ax1.eventplot(non_shuffled['75']['grid_spikes'][100][0:n_grid], linelengths=1, linewidth=linewidth, lineoffsets=range(1,n_grid+1))
+ax1.eventplot(
+    non_shuffled['75']['grid_spikes'][100][:n_grid],
+    linelengths=1,
+    linewidth=linewidth,
+    lineoffsets=range(1, n_grid + 1),
+)
 ax1.set_xlim(xlim)
 ax1.set_ylabel("Grid Cell #")
 ax1.vlines(x=theta_lines, ymin=-5, ymax=205, alpha=vline_alpha)
@@ -37,7 +42,12 @@ ax1.set_ylim((0,n_grid+1))
 ax1.set_yticks(range(0,n_grid+1, 5))
 ax1.set_title("Spike times")
 ax2 = fig.add_subplot(gs[4:8,0:6])
-ax2.eventplot(non_shuffled['75']['granule_spikes'][100][0:n_granule], linelengths=1, linewidth=linewidth, lineoffsets=range(1,n_granule+1))
+ax2.eventplot(
+    non_shuffled['75']['granule_spikes'][100][:n_granule],
+    linelengths=1,
+    linewidth=linewidth,
+    lineoffsets=range(1, n_granule + 1),
+)
 ax2.set_xlim(xlim)
 ax2.set_ylabel("Granule Cell #")
 ax2.set_xlabel("Time (ms)")
@@ -45,7 +55,7 @@ ax2.vlines(x=theta_lines, ymin=-50, ymax=2050, alpha=vline_alpha)
 ax2.set_ylim((0,n_granule+1))
 ax1.set_yticks(range(0,n_granule+1, 5))
 
-trajectories = [x for x in list(non_shuffled.keys())]
+trajectories = list(list(non_shuffled.keys()))
 n_samples = 20
 
 grid_spikes_non_shuffled = load_spikes(path_non_shuffled, "grid", trajectories, n_samples)
@@ -93,7 +103,7 @@ plt.colorbar(im8, ax=ax8, orientation="horizontal")
 for ax in [ax3, ax4, ax5, ax6, ax7, ax8]:
     ax.set_yticks(range(0,n_grid+1, 5))
     ax.set_ylim(ax1.get_ylim())
-    
+
 for ax in [ax1, ax3, ax4, ax5, ax6, ax7, ax8]:
     ax.axes.get_xaxis().set_visible(False)
 
@@ -141,9 +151,6 @@ for axis in [ax3, ax4, ax5, ax6, ax7, ax8, ax9, ax10, ax11, ax12, ax13, ax14]:
     # axis.axis("off")
     # axis.axes.get_xaxis().set_visible(False)
     axis.axes.get_yaxis().set_visible(False)
-    pass
-
-
 # ax15 is a placeholder for a perceptron schematic
 ax15 = fig.add_subplot(gs[8:12,:4])
 

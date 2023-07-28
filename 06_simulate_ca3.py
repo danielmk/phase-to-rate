@@ -3,8 +3,9 @@ Created on Tue Mar  1 13:33:57 2022
 
 @author: oliver braganza
 """
+
 import pandas as pd
-import os 
+import os
 import shelve
 import numpy as np
 import matplotlib as mpl
@@ -32,10 +33,7 @@ vr = -54*mV                     # reset voltage after a spike
 El = -67*mV                     # resting potential
 gmax = 1                      # max exc. conductance
 dApre = .1
-if symmetricSTDP:
-    dApost = dApre
-else:
-    dApost = -dApre
+dApost = dApre if symmetricSTDP else -dApre
 dApost *= gmax
 dApre *= gmax
 
@@ -96,7 +94,7 @@ net.add(monitors)
 net.store()
 
 #net.run(simulation_time*second, report='text')
- 
+
 condition_dict = {}
 for tauSTDP in tauSTDP_list:
     taupre = taupost = tauSTDP*ms

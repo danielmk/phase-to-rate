@@ -51,7 +51,7 @@ def skaggs_information(spike_times, dur_ms, time_bin_size,
                 count = np.logical_and(spikes > time, spikes < times[j+1]).sum()
                 rates[cell, j] = count/time_bin_s
             mean_rate = np.mean(rates[cell, :])
-    
+
             for j, time in enumerate(times):
                 if j == times.shape[0]-1:
                     break
@@ -60,7 +60,6 @@ def skaggs_information(spike_times, dur_ms, time_bin_size,
                 if info == info: 
                     skaggs[j] = info
             skaggs_all[cell] = (1/(n_time_bins))*np.sum(skaggs)
-        skaggs_info = np.mean(skaggs_all)
     else:
         n_phase_bins = int(360/phase_bin_size)
         rates = np.zeros((n_cell, n_phase_bins, n_time_bins))
@@ -91,9 +90,7 @@ def skaggs_information(spike_times, dur_ms, time_bin_size,
                     if info == info: 
                         skaggs[i, j] = info
             skaggs_all[cell] = (1/(n_phase_bins*n_time_bins))*np.sum(skaggs)
-        # skaggs_info = np.sum(skaggs_all)
-        skaggs_info = np.mean(skaggs_all)
-    return skaggs_info
+    return np.mean(skaggs_all)
 
 # =============================================================================
 # aggraegate spikes from poisson seeds
@@ -126,11 +123,11 @@ def filter_inact_granule(agg_spikes, threshold):
     n_cell = len(agg_spikes[0])
     n_grid = len(agg_spikes)
     for grid in range(n_grid):
-        cells = []
-        for cell in range(n_cell):
-            # print(len(agg_spikes[grid][cell]))
-            if len(agg_spikes[grid][cell])>threshold:
-                cells.append(agg_spikes[grid][cell])
+        cells = [
+            agg_spikes[grid][cell]
+            for cell in range(n_cell)
+            if len(agg_spikes[grid][cell]) > threshold
+        ]
         filtered_cells.append(cells)
     return filtered_cells
 
@@ -141,17 +138,14 @@ def filter_inact_granule(agg_spikes, threshold):
 nonshuffled_granule_spikes = []
 shuffled_granule_spikes = []
 
+path = r'C:\Users\Daniel\repos\phase-to-rate\data\noise\grid-seed_trajectory_poisson-seeds_duration_shuffling_tuning_pp-weight_noise-scale_'
+
 for tuning in tunes:
     all_spikes = {}
     for grid_seed in grid_seeds:
 
-        path = r'C:\Users\Daniel\repos\phase-to-rate\data\noise\grid-seed_trajectory_poisson-seeds_duration_shuffling_tuning_pp-weight_noise-scale_'
-
         pp_strength = 0.0009
-        if tuning == 'no-feedback':
-            pp_strength = 0.0007
-        else:
-            pp_strength = 0.0009
+        pp_strength = 0.0007 if tuning == 'no-feedback' else 0.0009
         ns_path = (path + str(grid_seed) + "_[75]_100-119_2000_non-shuffled_"+str(tuning)+f"_{pp_strength}_0.25")
         grid_spikes = load_spikes_DMK(ns_path, "grid", trajectories, n_samples)
         granule_spikes = load_spikes_DMK(ns_path, "granule", trajectories, n_samples)
@@ -160,13 +154,13 @@ for tuning in tunes:
         s_path = (path + str(grid_seed) + "_[75]_100-119_2000_shuffled_"+str(tuning)+f"_{pp_strength}_0.25")
         s_grid_spikes = load_spikes_DMK(s_path, "grid", trajectories, n_samples)
         s_granule_spikes = load_spikes_DMK(s_path, "granule", trajectories, n_samples)
-        
+
         print('shuffled path ok')
 
-        all_spikes[grid_seed] = {"shuffled": {}, "non-shuffled": {}}
-        all_spikes[grid_seed]["shuffled"] = {"grid": s_grid_spikes, "granule": s_granule_spikes}
-        all_spikes[grid_seed]["non-shuffled"] = {"grid": grid_spikes, "granule": granule_spikes}
-        
+        all_spikes[grid_seed] = {
+            "shuffled": {"grid": s_grid_spikes, "granule": s_granule_spikes},
+            "non-shuffled": {"grid": grid_spikes, "granule": granule_spikes},
+        }
         nonshuffled_granule_spikes.append(granule_spikes)
         shuffled_granule_spikes.append(s_granule_spikes)
 
@@ -178,18 +172,18 @@ for tuning in tunes:
     all_ns_granule = filter_inact_granule(all_ns_granule, threshold)
     all_s_granule = aggr(all_spikes, 'shuffled', 'granule')
     all_s_granule = filter_inact_granule(all_s_granule, threshold)
-    
+
     ns_grid_skaggs = []
     s_grid_skaggs = []
     ns_granule_skaggs = []
     s_granule_skaggs = []
-    
+
     for grid in grid_seeds_idx:
         ns_grid = all_ns_grid[grid]
         s_grid = all_s_grid[grid]
         ns_granule = all_ns_granule[grid]
         s_granule = all_s_granule[grid]
-        
+
         ns_grid_skaggs.append(skaggs_information(ns_grid, dur_ms, time_bin,
                                                  phase_bin_size=phase_bin))
         s_grid_skaggs.append(skaggs_information(s_grid, dur_ms, time_bin,
@@ -227,11 +221,11 @@ for idx_s, seed in enumerate(nonshuffled_granule_spikes):
 
     curr_phases = np.array(nonshuffled_granule_phases[idx_s][75], dtype=object).reshape((2000, 20))
     curr_phases_flat = np.array([np.array([x for tr in traj for x in tr]) for traj in curr_phases], dtype=object)
-    
+
     modulation = np.array([np.array([np.sqrt(np.cos(aps).sum()**2 + np.sin(aps).sum()**2)]) / len(aps) for aps in curr_phases_flat])
-    
+
     nonshuffled_mean_modulation.append(modulation)
-    
+
 
 for idx_s, seed in enumerate(shuffled_granule_spikes):
     for idx, y in enumerate(shuffled_granule_spikes[idx_s][75]):
@@ -241,8 +235,8 @@ for idx_s, seed in enumerate(shuffled_granule_spikes):
 
     curr_phases = np.array(shuffled_granule_phases[idx_s][75], dtype=object).reshape((2000, 20))
     curr_phases_flat = np.array([np.array([x for tr in traj for x in tr]) for traj in curr_phases], dtype=object)
-    
+
     modulation = np.array([np.array([np.sqrt(np.cos(aps).sum()**2 + np.sin(aps).sum()**2)]) / len(aps) for aps in curr_phases_flat])
-    
+
     shuffled_mean_modulation.append(modulation)
 

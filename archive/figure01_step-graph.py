@@ -30,21 +30,22 @@ def precession_spikes(overall, dur_s=5, n_sim=1000, T=0.1,
                         t_stop=dur_s*pq.s,
                         sampling_period=dt_s*pq.s,
                         sampling_interval=dt_s*pq.s)
-    
+
     times = np.arange(0, dur_s+T, T)
     n_time_bins = int(dur_s/T)
     phase_norm_fact = 360/bins_size_deg
     n_phase_bins = int(720/bins_size_deg)
     phases = [[] for _ in range(n_time_bins)]
     trains = []
-    for i in range(n_sim):
+    for _ in range(n_sim):
         train = stg.inhomogeneous_poisson_process(asig,
                                                   refractory_period = (0.001*pq.s),
                                                   as_array=True)
-        if shuffle is True:
-            train = grid_model._randomize_grid_spikes(train, 100, time_ms=dur_ms)
-        else:
-            train = train
+        train = (
+            grid_model._randomize_grid_spikes(train, 100, time_ms=dur_ms)
+            if shuffle is True
+            else train
+        )
         trains.append(train)
         for j, time in enumerate(times):
             if j == times.shape[0]-1:
@@ -155,7 +156,7 @@ ax1.set_ylabel('Grid field')
 ax2.plot(rate_t_arr, grid_overall)
 # ax2.set_title('Overall Rate Profile')
 ax2.set_ylabel('Frequency (Hz)')
-    
+
 ax3.eventplot(np.array(spike_trains[:5]), linewidth=0.7, linelengths=0.5)
 # ax3.set_title('Spikes')
 ax3.set_yticklabels([])
@@ -178,7 +179,7 @@ f1.tight_layout()
 
 
 save_dir = '/home/baris/paper/figures/'
-f1.savefig(save_dir+'figure01_D.eps', dpi=200)
-f1.savefig(save_dir+'figure01_D.png', dpi=200)
+f1.savefig(f'{save_dir}figure01_D.eps', dpi=200)
+f1.savefig(f'{save_dir}figure01_D.png', dpi=200)
 
 ##############################################
